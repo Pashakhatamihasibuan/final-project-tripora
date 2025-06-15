@@ -9,8 +9,19 @@ import NavigationLinks from "@/components/ui/NavigationLinks";
 import MobileMenu from "./MobileMenu";
 
 export default async function Navbar() {
-  const token = cookies().get("token")?.value;
-  const userName = cookies().get("userName")?.value;
+  const cookieStore = cookies();
+  const token = cookieStore.get("token")?.value;
+  const userCookie = cookieStore.get("user")?.value;
+
+  let user = null;
+  if (userCookie) {
+    try {
+      user = JSON.parse(userCookie);
+    } catch (e) {
+      console.error("Failed to parse user cookie:", e);
+    }
+  }
+
   const isLoggedIn = !!token;
 
   const activitiesData = await getAllActivities();
@@ -51,11 +62,9 @@ export default async function Navbar() {
             </Button>
           </Link>
           <div className="hidden md:block h-6 border-l"></div>
-          {isLoggedIn ? (
+          {isLoggedIn && user ? (
             <div className="flex items-center gap-2">
-              <span className="hidden sm:inline text-sm font-medium text-gray-700">
-                Halo, {userName || "Pengguna"}
-              </span>
+              <span className="hidden sm:inline text-sm font-medium text-gray-700">Halo, {user.name || "Pengguna"}</span>
               <form action={logout}>
                 <Button variant="outline" size="sm">
                   Logout
